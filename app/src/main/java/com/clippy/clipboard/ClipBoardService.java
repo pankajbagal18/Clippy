@@ -1,43 +1,39 @@
 package com.clippy.clipboard;
 
-import android.app.IntentService;
-import android.content.Context;
+import android.app.Service;
+import android.content.ClipboardManager;
 import android.content.Intent;
+import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-public class ClipBoardService extends IntentService {
+public class ClipBoardService extends Service {
 
     final private String TAG_CLIP_BOARD = "CLIP_BOARD";
-    private ClipboardHandler clipboardHandler;
-    private Context context;
 
-    /**
-     * Creates an IntentService.  Invoked by your subclass's constructor.
-     *
-     * @param name Used to name the worker thread, important only for debugging.
-     */
-    public ClipBoardService(Context context, String name) {
-        super(name);
-        this.context = context;
+    private ClipboardManager.OnPrimaryClipChangedListener clipChangedListener = () -> performCopying();
+
+    private void performCopying() {
+        Log.i(TAG_CLIP_BOARD, "started copying");
+        Toast.makeText(this, "Copied This", Toast.LENGTH_LONG).show();
     }
 
-    public ClipBoardService() {
-        super("Clip Board Service");
+    @Override
+    public void onCreate() {
+        ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).addPrimaryClipChangedListener(clipChangedListener);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG_CLIP_BOARD, "service started");
-        ClipboardHandler clipboardHandler = new ClipboardHandler(this);
-        clipboardHandler.saveClip();
         return START_STICKY;
     }
 
+    @Nullable
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        String dataString = intent.getDataString();
-        Log.i(TAG_CLIP_BOARD, "work data string " + dataString);
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }
